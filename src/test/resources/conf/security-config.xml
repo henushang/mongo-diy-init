@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+	
+	<global-method-security secured-annotations="enabled" />
+	
+	<beans:bean id="defaultWebInvocationPrivilegeEvaluator" class="org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator" >
+    	<beans:constructor-arg name="securityInterceptor" ref="mySecurityFilter"></beans:constructor-arg>
+    </beans:bean>
+    
+	<!-- 不需要进行认证的资源，3.0之后才改为这样配置 --> 
+	<http security="none" pattern="/**/login" />
+    
+	<http auto-config="true" path-type="ant" access-denied-page="/mygeniusadmin/login">
+		<!--
+		<intercept-url pattern="/mygeniusadmin/logout*" access="ROLE_ANONYMOUS" />
+		<intercept-url pattern="/mygeniusadmin/login*" access="ROLE_ANONYMOUS" />
+
+		<intercept-url pattern="/mygeniusadmin*" access="ROLE_ADMIN,ROLE_USER" />
+		<intercept-url pattern="/mygeniusadmin/**" access="ROLE_ADMIN,ROLE_USER" />
+		-->
+		<!--<intercept-url pattern="/mygeniusadmin/*" access="ROLE_ANONYMOUS,ROLE_ADMIN,ROLE_USER" />-->
+
+		<form-login login-page="/mygeniusadmin/login" always-use-default-target="true" login-processing-url="/mygeniusadmin/j_security_check"
+			authentication-failure-url="/mygeniusadmin/login" default-target-url="/mygeniusadmin/index" />
+		<logout logout-url="/mygeniusadmin/j_security_logout" logout-success-url="/mygeniusadmin/login" invalidate-session="true" />
+		
+		<custom-filter ref="mySecurityFilter" before="FILTER_SECURITY_INTERCEPTOR"/>
+	</http>
+
+	<!-- 配置过滤器 -->  
+    <beans:bean id="mySecurityFilter" class="com.genius.core.spring.security.MySecurityFilter">
+        <!-- 用户拥有的权限 -->
+        <beans:property name="authenticationManager" ref="myAuthenticationManager" />
+        <!-- 资源与权限对应关系 -->
+        <beans:property name="securityMetadataSource" ref="mySecurityMetadataSource" />
+        <!-- 用户是否拥有所请求资源的权限 -->
+        <beans:property name="accessDecisionManager" ref="myAccessDecisionManager" />
+    </beans:bean>
+    
+    <!-- 实现了UserDetailsService的Bean -->
+    <beans:bean id="myAccessDecisionManager" class="com.genius.core.spring.security.MyAccessDecisionManager"></beans:bean>
+    <beans:bean id="mySecurityMetadataSource" class="com.mygenius.core.spring.security.MySecurityMetadataSource"></beans:bean>
+    <!--
+    <authentication-manager alias="myAuthenticationManager">
+        <authentication-provider user-service-ref="myUserDetailServiceImpl" />
+    </authentication-manager>
+    <beans:bean id="myUserDetailServiceImpl" class="com.huaxin.security.MyUserDetailServiceImpl">
+        <beans:property name="usersDao" ref="usersDao"></beans:property>
+    </beans:bean>
+    -->
+    
+	<!-- 
+		<authentication-manager>
+			<authentication-provider>
+				<password-encoder hash="md5" />
+				<user-service>
+					<user name="admin" password="e10adc3949ba59abbe56e057f20f883e" authorities="ROLE_ADMIN,ROLE_USER" />
+					<user name="great" password="e10adc3949ba59abbe56e057f20f883e" authorities="ROLE_USER" />
+				</user-service>
+			</authentication-provider>
+		</authentication-manager>
+		 -->
+	<!--<beans:bean id="adminDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<beans:property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<beans:property name="url" value="jdbc:mysql://localhost:3306/ShopDB" />
+		<beans:property name="username" value="root" />
+		<beans:property name="password" value="968" />
+	</beans:bean>-->
+	<authentication-manager alias="myAuthenticationManager">
+		<authentication-provider user-service-ref='adminDetailsService'>
+			<password-encoder hash="md5" />
+		</authentication-provider>
+	</authentication-manager>
+	<beans:bean id="adminDetailsService" class="org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl">
+		<beans:property name="dataSource" ref="dbcpDataSourceWebDB" />
+		<beans:property name="usersByUsernameQuery">
+			<beans:value>select adminid as username,pwd as password,'true' as 'enabled' from admin where adminid=? and status = 1</beans:value>
+		</beans:property>
+		<beans:property name="authoritiesByUsernameQuery">
+			<beans:value>select adminid, roleid as authority from adminrole where adminid = ?</beans:value>
+		</beans:property>
+	</beans:bean>
+</beans:beans>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean id="globalFirstInterceptor" class="com.genius.core.interceptors.GlobalFirstInterceptor"></bean>
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean id="webInterceptor" class="com.mygenius.core.interceptors.WebInterceptor"></bean>
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean id="uhomeInterceptor" class="com.mygenius.core.interceptors.UHomeInterceptor">
+				<property name="regex" value="/\d+.*" />
+			</bean>
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/mycenter**"/>
+			<mvc:mapping path="/mycenter/**"/>
+			<bean id="mycenterInterceptor" class="com.mygenius.core.interceptors.MyCenterInterceptor"></bean>
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/mygeniusadmin*"/>
+			<mvc:mapping path="/mygeniusadmin/**"/>
+			<bean id="adminInterceptor" class="com.mygenius.core.interceptors.AdminInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	 
+</beans>

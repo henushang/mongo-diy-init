@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	
+	<!-- Import apache CXF bean definition 固定-->
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+	
+	<!-- services接口配置 -->
+	<bean id="authWebServiceBean" class="com.mygenius.web.webservice.AuthWebServiceImpl" />
+	
+	<!-- CXF 配置WebServices的服务名及访问地址 -->
+	<jaxws:endpoint id="authWebService" implementor="#authWebServiceBean" address="/auth">
+		<!-- 请求拦截器 -->
+				<jaxws:inInterceptors>
+					<bean class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
+				</jaxws:inInterceptors>
+		<!-- 响应拦截器 -->
+				<jaxws:outInterceptors>
+					<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
+				</jaxws:outInterceptors>	
+	</jaxws:endpoint>
+	
+	<!-- Create a Client -->
+	<!--<jaxws:client id="helloClient" serviceClass="com.mygenius.web.webservice.AuthWebService" address="http://www.supergenius.cn/ws/auth" />	-->
+</beans>

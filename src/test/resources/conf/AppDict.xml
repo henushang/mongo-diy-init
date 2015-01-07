@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+	
+	<!-- Web Configuration -->
+	<util:properties id="web" location="classpath:webconfig/web.properties"/>
+	<util:properties id="sys" location="classpath:webconfig/sys.properties"/>
+	<util:properties id="mapping" location="classpath:webconfig/mapping.properties"/>
+    
+    <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <!-- <value>classpath:conn/RepliConns.properties</value> -->
+                <!--如果有多个属性文件,依次在下面列出来 -->
+                <value>classpath:conn/MongodbConn.properties</value>
+            </list>
+        </property>
+    </bean>
+    
+	<!--国际化资源 for spring & ftl -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>i18n/global</value>
+				<value>i18n/msg</value>
+				<value>i18n/error</value>
+				<value>i18n/enum</value>
+				<value>i18n/seo</value>
+				<value>i18n/official</value>
+				<value>i18n/platform</value>
+			</list>
+		</property>
+	</bean>
+	
+	<util:list id="beanNameList">
+		<value>*SOImpl</value>
+	</util:list>
+</beans>

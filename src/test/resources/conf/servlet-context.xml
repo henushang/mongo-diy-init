@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<!-- 注解请求映射 -->
+	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="pathMatcher">
+			<bean class="com.genius.core.spring.CaseInsensitivePathMatcher"></bean>
+		</property>
+		<property name="alwaysUseFullPath"><value>true</value></property>
+		<!-- <property name="interceptors"> -->
+		<!-- <list> -->
+		<!-- <ref bean="logNDCInteceptor"/> 日志拦截器，这是你自定义的拦截器 -->
+		<!-- <ref bean="myRequestHelperInteceptor"/> RequestHelper拦截器，这是你自定义的拦截器 -->
+		<!-- <ref bean="myPermissionsInteceptor"/> 权限拦截器，这是你自定义的拦截器 -->
+		<!-- <ref bean="myUserInfoInteceptor"/> 用户信息拦截器，这是你自定义的拦截器 -->
+		<!-- </list> -->
+		<!-- </property> -->
+	</bean>
+
+	<!-- Invokes Spring MVC @Controller methods -->
+	<!-- bean validation -->
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"
+		p:validationMessageSource-ref="messageSource">
+		<description>
+			Enable the bean validation provider, and configure it touse the messageSource when resolving properties
+		</description>
+	</bean>
+
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="pathMatcher">
+			<bean class="com.genius.core.spring.CaseInsensitivePathMatcher"></bean>
+		</property>
+		<property name="messageConverters">
+			<list>
+				<ref bean="byteArray_hmc" />
+				<ref bean="string_hmc" />
+				<ref bean="resource_hmc" />
+				<ref bean="source_hmc" />
+				<ref bean="xmlAwareForm_hmc" />
+				<ref bean="jaxb2RootElement_hmc" />
+				<ref bean="jackson_hmc" />
+			</list>
+		</property>
+		<property name="webBindingInitializer">
+			<!-- Configures Spring MVC DataBinder instances -->
+			<bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+				<property name="validator" ref="validator" />
+				<property name="conversionService" ref="conversionService" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="byteArray_hmc" class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+	<bean id="string_hmc" class="com.genius.core.spring.UTF8StringHttpMessageConverter" /><!-- 处理utf-8.. -->
+	<bean id="resource_hmc" class="org.springframework.http.converter.ResourceHttpMessageConverter" />
+	<bean id="source_hmc" class="org.springframework.http.converter.xml.SourceHttpMessageConverter" />
+	<bean id="xmlAwareForm_hmc" class="org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter" />
+	<bean id="jaxb2RootElement_hmc" class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter" />
+	<bean id="jackson_hmc" class="com.genius.core.converters.JacksonHttpMessageConverter" /><!-- 处理json -->
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources/directory -->
+	<mvc:resources mapping="/css/**" location="/css/" />
+	<mvc:resources mapping="/imgs/**" location="/imgs/" />
+	<mvc:resources mapping="/js/**" location="/js/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:order="10">
+		<property name="prefix" value="/WEB-INF/Views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+
+	<!-- FreeMarker基础设施及视图解析器配置 -->
+	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer" p:defaultEncoding="UTF-8">
+		<property name="templateLoaderPaths">
+			<list>
+				<value>/WEB-INF/Views/Web/</value>
+				<value>/WEB-INF/Views/User/</value>
+				<value>/WEB-INF/Views/Admin/</value>
+				<value>/WEB-INF/Views/Errors/</value>
+				<value>/WEB-INF/Views/</value>
+				<value>/</value>
+			</list>
+		</property>
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="classic_compatible">true</prop>
+				<!-- <prop key="template_update_delay">3600</prop> -->
+				<!-- <prop key="defaultEncoding">UTF-8</prop> -->
+				<!-- <prop key="locale">zh_CN</prop> -->
+				<prop key="url_escaping_charset">UTF-8</prop>
+				<prop key="boolean_format">true,false</prop>
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+				<prop key="date_format">yyyy-MM-dd</prop>
+				<prop key="time_format">HH:mm:ss</prop>
+				<prop key="auto_import">spring.ftl as s,/WEB-INF/FtlLib/Global.ftl as g</prop>
+			</props>
+		</property>
+		<!-- <property name="freemarkerVariables"> -->
+		<!-- <map> -->
+		<!-- <entry key="xml_escape" value-ref="fmXmlEscapeMethod" /> -->
+		<!-- </map> -->
+		<!-- </property> -->
+	</bean>
+
+	<bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver" p:order="5" p:suffix=".ftl"
+		p:contentType="text/html; charset=utf-8" p:exposeRequestAttributes="true" p:exposeSessionAttributes="true"
+		p:exposeSpringMacroHelpers="true" p:requestContextAttribute="request">
+		<property name="viewClass" value="com.genius.core.views.FtlView" />
+	</bean>
+
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<bean class="com.genius.core.converters.StringToJodaDateConverter" />
+				<bean class="com.genius.core.converters.StringToJodaDateTimeConverter" />
+				<bean class="com.genius.core.converters.StringToDoubleConverter" />
+				<bean class="com.genius.core.converters.StringToIntegerConverter" />
+				<bean class="com.genius.core.converters.StringToEStatusConverter" />
+				<bean class="com.genius.core.converters.StringToEGenderConverter" />
+			</set>
+		</property>
+	</bean>
+
+	<!-- Only needed because we require fileupload in the org.springframework.samples.mvc.fileupload package -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize">
+			<value>20480000</value><!-- 20M -->
+		</property>
+		<property name="resolveLazily">
+			<value>true</value>
+		</property>
+		<property name="defaultEncoding">
+			<value>UTF-8</value>
+		</property>
+	</bean>
+	
+	<!-- Configure a SimpleMappingExceptionResolver. -->
+	<bean id="exceptionResolver" class="com.mygenius.core.spring.MyExceptionResolver">
+		<!--
+		<property name="exceptionMappings">
+			<map>
+				<entry key="DatabaseException" value="databaseError" />
+				<entry key="InvalidCreditCardException" value="creditCardError" />
+			</map>
+		</property>
+		-->
+		<!-- Override name of exception attribute. Default is 'exception'. -->
+		<property name="exceptionAttribute" value="ex" />
+		<!-- Name of logger to use to log exceptions. Unset by default, so logging disabled -->
+		<!-- <property name="warnLogCategory" value="example.MvcLogger" /> -->
+		<property name="defaultErrorView" value="error" />
+	</bean>
+
+	<!-- Imports user-defined @Controller beans that process client requests -->
+	<import resource="web-controllers.xml" />
+
+	<import resource="web-interceptors.xml" />
+
+</beans>

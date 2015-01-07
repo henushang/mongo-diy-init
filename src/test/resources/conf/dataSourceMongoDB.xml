@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <bean id="mongoDBConn" class="com.genius.xo.mongodb.dao.MongoDBConn">
+        <property name="hostname" value="${mongodb.hostname}" />
+        <property name="username" value="${mongodb.username}" />
+        <property name="password" value="${mongodb.password}" />
+        <property name="credential" value="${mongodb.credential}" />
+        <property name="usersource" value="${mongodb.usersource}" />
+    </bean>
+    
+    <bean id="mongoDBFactory" class="com.genius.xo.mongodb.dao.MongoDBFactory" init-method="getInstance" scope="singleton">
+        <property name="mongodbConn" ref="mongoDBConn"/>
+    </bean>
+    
+    <bean id="db" factory-bean="mongoDBFactory" factory-method="getDB" scope="singleton" /> 
+
+</beans>
